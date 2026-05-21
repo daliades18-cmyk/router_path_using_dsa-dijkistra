@@ -1,35 +1,83 @@
-# Router Path Using DSA (Dijkstra Algorithm)
+# Router Path Using Dijkstra Algorithm
 
-## Project Overview
+## Overview
 
-Router Path Using DSA is a web-based visualization project that simulates how internet packets travel between routers using graph algorithms.
+Router Path Using Dijkstra Algorithm is a web-based visualization project that simulates how packets travel between routers in a network using graph algorithms.
 
-This project was developed as a first-year Data Structures and Algorithms (DSA) mini project to understand:
-- Graphs
-- Shortest Path Algorithms
-- Dijkstra Algorithm
-- Networking Basics
-- Visualization using Web Technologies
+The project was created to understand:
+- Graph data structures
+- Dijkstra shortest path algorithm
+- Networking basics
+- Visualization using HTML Canvas
 
-The project visually demonstrates how routers communicate and how packets choose the shortest route from source to destination.
+The simulation shows how routers communicate and how the shortest route is selected between source and destination routers.
+
+---
+
+# Steps to Run the Project
+
+## Step 1
+Open Visual Studio Code.
+
+## Step 2
+Create a new folder for the project.
+
+Example:
+router_path_project
+
+## Step 3
+Inside the folder, create these files:
+
+- index.html
+- style.css
+- script.js
+
+## Step 4
+Copy the HTML code into:
+index.html
+
+Copy the CSS code into:
+style.css
+
+Copy the JavaScript code into:
+script.js
+
+## Step 5
+Open index.html in a browser.
+
+OR
+
+Use VS Code Live Server extension.
+
+Right click on:
+index.html
+
+Select:
+Open with Live Server
 
 ---
 
 # Technologies Used
 
-## Frontend
-- HTML
-- CSS
-- JavaScript
+## HTML
+Used for creating the webpage structure.
 
-## Visualization
-- HTML Canvas API
+## CSS
+Used for styling routers, buttons, and layout.
 
-## DSA Concepts
-- Graph Data Structure
-- Dijkstra Algorithm
-- Weighted Graphs
-- Traversal Logic
+## JavaScript
+Used for:
+- Graph logic
+- Dijkstra algorithm
+- Animation
+- Packet movement
+- Canvas rendering
+
+## HTML Canvas API
+Used for:
+- Drawing routers
+- Drawing network connections
+- Visualizing packet movement
 
 ---
 
@@ -37,180 +85,143 @@ The project visually demonstrates how routers communicate and how packets choose
 
 ## Graph
 
-The complete network is represented using a graph.
+The network is represented using a graph.
 
 In this project:
-- Routers are treated as vertices (nodes)
-- Connections are treated as edges
+- Routers are vertices (nodes)
+- Connections are edges
 
-Each edge contains a weight which represents network distance or cost.
-
----
-
-# Weighted Graph Representation
-
-The project uses weighted edges because routing decisions depend on distance between routers.
-
-The edge weight is calculated dynamically using the distance formula between routers on screen.
-
-Distance formula used:
-
-
-::contentReference[oaicite:0]{index=0}
-
-
-This weight becomes the routing cost between two routers.
+Each connection has a weight representing routing cost or distance.
 
 ---
 
 # Dijkstra Algorithm
 
-The main DSA concept used in this project is Dijkstra Shortest Path Algorithm.
+The main algorithm used is Dijkstra Shortest Path Algorithm.
 
-The algorithm finds the shortest path between:
+The algorithm calculates the shortest path between:
 - source router
 - destination router
 
-It works efficiently on weighted graphs.
+It works on weighted graphs and finds the minimum distance route.
 
 ---
 
-# How Dijkstra Works In This Project
+# How the Program Works
 
-The algorithm maintains:
-- distance array
-- visited nodes
-- previous node tracking
+## Router Creation
 
-Initially:
-- source node distance = 0
-- all other distances = Infinity
-
-The algorithm repeatedly selects the nearest unvisited router and updates neighboring router distances.
-
-Shortest path update logic:
-
-:contentReference[oaicite:1]{index=1}
-
-Where:
-- d(v) = current shortest distance
-- d(u) = distance of current node
-- w(u,v) = edge weight
-
----
-
-# DSA Implementation
-
-## Nodes
-Routers are stored as objects containing:
-- x coordinate
-- y coordinate
+Routers are created as nodes with:
+- x position
+- y position
 - router id
-- router state
+
+These routers are displayed visually on the screen.
 
 ---
 
-## Edges
-Connections store:
+## Edge Creation
+
+Connections are created between routers.
+
+Each connection contains:
 - source router
 - destination router
-- weight
+- distance weight
+
+The weight represents routing cost.
 
 ---
 
 ## Pathfinding
-Dijkstra algorithm calculates:
-- shortest route
-- alternative route during failures
+
+When source and destination routers are selected:
+- Dijkstra algorithm starts
+- shortest distance is calculated
+- best route is selected
+
+The final path is highlighted visually.
 
 ---
 
-## Traversal
-Neighbor routers are explored through graph traversal logic.
+## Packet Movement
 
----
+The project simulates packet transfer.
 
-# Visualization Logic
+Packets move:
+- from source router
+- through intermediate routers
+- to destination router
 
-The project uses HTML Canvas API to visualize:
-- routers
-- network connections
-- packet movement
-- failed routers
-
-Packets move dynamically along the shortest calculated path.
-
-Visualization improves understanding of:
-- graph traversal
-- shortest path selection
-- routing behavior
+This helps visualize routing behavior.
 
 ---
 
 # Router Failure Handling
 
-The project includes failed router simulation.
+The project includes router failure simulation.
 
 When a router fails:
-- it becomes inactive
-- Dijkstra ignores that node
-- alternative route is calculated
+- the router becomes inactive
+- Dijkstra ignores the failed router
+- an alternative route is calculated
 
-This simulates real-world network rerouting systems.
+This simulates real-world network rerouting.
 
 ---
 
-# Time Complexity
+# Concepts Used
 
-Current implementation uses array sorting during pathfinding.
-
-Time complexity:
-
-:contentReference[oaicite:2]{index=2}
-
-Where:
-- V = number of vertices
+This project uses:
+- Graphs
+- Weighted graphs
+- Arrays
+- Objects
+- Loops
+- Conditions
+- Shortest path algorithms
+- Canvas visualization
 
 ---
 
 # Applications
 
-Concepts used in this project are used in:
+The concepts used in this project are used in:
 - Internet routing
-- GPS systems
+- GPS navigation
 - Network communication
-- Traffic routing
-- Delivery systems
+- Traffic systems
+- Delivery routing systems
 
 ---
 
 # Learning Outcomes
 
-Through this project I learned:
+From this project, I learned:
 - Graph implementation
-- Weighted graph traversal
 - Dijkstra Algorithm
-- Visualization techniques
+- Pathfinding logic
+- Network simulation
 - Canvas rendering
-- Simulation logic
-- Event handling in JavaScript
+- JavaScript event handling
+- Visualization techniques
 
 ---
 
 # Future Improvements
 
 Possible future improvements:
-- Min Heap optimization
-- Packet congestion simulation
-- Dynamic routing updates
+- Min heap optimization
+- Traffic congestion simulation
 - Packet loss simulation
-- Real-time traffic balancing
+- Dynamic routing updates
+- Real-time network visualization
 
 ---
 
 # Conclusion
 
-Router Path Using DSA is a visualization-based DSA project that demonstrates shortest path routing using Dijkstra Algorithm.
+Router Path Using Dijkstra Algorithm is a network simulation project that demonstrates shortest path routing using graph algorithms and visualization techniques.
 
 The project combines:
 - Data Structures
@@ -218,4 +229,4 @@ The project combines:
 - Networking Concepts
 - Web Visualization
 
-to create an interactive and educational simulation system.
+to create an interactive routing simulation system.
