@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internet Packet Visualizer</title>
+
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: white;
+    }
+
+    .topbar {
+        background: #1e293b;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .controls button {
+        margin-right: 10px;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        background: #3b82f6;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .controls button:hover {
+        background: #2563eb;
+    }
+
+    canvas {
+        display: block;
+        background: #111827;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <h2>Internet Packet Visualizer</h2>
+
+    <div class="controls">
+        <button id="addNodeBtn">Add Router</button>
+        <button id="connectBtn">Connect</button>
+        <button id="sendPacketBtn">Send Packet</button>
+        <button id="failBtn">Fail Router</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight - 70;
+
+let nodes = [];
+let edges = [];
+let packets = [];
+
+let mode = "";
+let selectedNode = null;
+
+const radius = 22;
+
+class Node {
+    constructor(x, y, id) {
+        this.x = x;
+        this.y = y;
+        this.id = id;
+        this.failed = false;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+
+        ctx.fillStyle = this.failed ? "red" : "#22c55e";
+        ctx.fill();
+
+        ctx.fillStyle = "white";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(this.id, this.x, this.y + 5);
+    }
+}
+
+class Packet {
+    constructor(path) {
+        this.path = path;
+        this.currentIndex = 0;
+        this.progress = 0;
+    }
+
+    update() {
+        if (this.currentIndex >= this.path.length - 1) return;
+
+        this.progress += 0.01;
+
+        if (this.progress >= 1) {
+            this.progress = 0;
+            this.currentIndex++;
+        }
+    }
+
+    draw() {
+        if (this.currentIndex >= this.path.length - 1) return;
+
+        let from = this.path[this.currentIndex];
+        let to = this.path[this.currentIndex + 1];
+
+        let x = from.x + (to.x - from.x) * this.progress;
+        let y = from.y + (to.y - from.y) * this.progress;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = "yellow";
+        ctx.fill();
+    }
+}
+
+function drawEdges() {
+    edges.forEach(edge => {
+        ctx.beginPath();
+        ctx.moveTo(edge.a.x, edge.a.y);
+        ctx.lineTo(edge.b.x, edge.b.y);
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Weight label
+        let midX = (edge.a.x + edge.b.x) / 2;
+        let midY = (edge.a.y + edge.b.y) / 2;
+
+        ctx.fillStyle = "cyan";
+        ctx.font = "14px Arial";
+        ctx.fillText(Math.floor(edge.weight), midX, midY);
+    });
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawEdges();
+
+    nodes.forEach(node => node.draw());
+
+    packets.forEach(packet => {
+        packet.update();
+        packet.draw();
+    });
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+function getNodeAt(x, y) {
+    for (let node of nodes) {
+        let dx = node.x - x;
+        let dy = node.y - y;
+
+        if (Math.sqrt(dx * dx + dy * dy) <= radius) {
+            return node;
+        }
+    }
+
+    return null;
+}
+
+canvas.addEventListener('click', e => {
+    let rect = canvas.getBoundingClientRect();
+
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+
+    if (mode === "add") {
+        let id = String.fromCharCode(65 + nodes.length);
+        nodes.push(new Node(x, y, id));
+    }
+
+    else if (mode === "connect") {
+        let node = getNodeAt(x, y);
+
+        if (!node) return;
+
+        if (!selectedNode) {
+            selectedNode = node;
+        } else {
+
+            edges.push({
+                a: selectedNode,
+                b: node,
+                weight: distance(selectedNode, node)
+            });
+
+            selectedNode = null;
+        }
+    }
+
+    else if (mode === "packet") {
+
+        let node = getNodeAt(x, y);
+
+        if (!node) return;
+
+        if (!selectedNode) {
+            selectedNode = node;
+        } else {
+
+            let path = dijkstra(selectedNode, node);
+
+            if (path.length > 0) {
+                packets.push(new Packet(path));
+            } else {
+                alert("No path found!");
+            }
+
+            selectedNode = null;
+        }
+    }
+
+    else if (mode === "fail") {
+
+        let node = getNodeAt(x, y);
+
+        if (node) {
+            node.failed = !node.failed;
+        }
+    }
+});
+
+function distance(a, b) {
+    let dx = a.x - b.x;
+    let dy = a.y - b.y;
+
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getNeighbors(node) {
+
+    let neighbors = [];
+
+    edges.forEach(edge => {
+
+        if (edge.a === node && !edge.b.failed) {
+            neighbors.push({
+                node: edge.b,
+                weight: edge.weight
+            });
+        }
+
+        if (edge.b === node && !edge.a.failed) {
+            neighbors.push({
+                node: edge.a,
+                weight: edge.weight
+            });
+        }
+    });
+
+    return neighbors;
+}
+
+function dijkstra(start, end) {
+
+    let distances = new Map();
+    let previous = new Map();
+    let unvisited = [];
+
+    nodes.forEach(node => {
+        distances.set(node, Infinity);
+        previous.set(node, null);
+        unvisited.push(node);
+    });
+
+    distances.set(start, 0);
+
+    while (unvisited.length > 0) {
+
+        unvisited.sort((a, b) =>
+            distances.get(a) - distances.get(b)
+        );
+
+        let current = unvisited.shift();
+
+        if (current.failed) continue;
+
+        if (current === end) break;
+
+        let neighbors = getNeighbors(current);
+
+        neighbors.forEach(neighbor => {
+
+            let alt =
+                distances.get(current) + neighbor.weight;
+
+            if (alt < distances.get(neighbor.node)) {
+
+                distances.set(neighbor.node, alt);
+
+                previous.set(neighbor.node, current);
+            }
+        });
+    }
+
+    let path = [];
+    let current = end;
+
+    while (current) {
+        path.unshift(current);
+        current = previous.get(current);
+    }
+
+    if (path[0] !== start) {
+        return [];
+    }
+
+    return path;
+}
+
+document.getElementById('addNodeBtn').onclick = () => {
+    mode = "add";
+};
+
+document.getElementById('connectBtn').onclick = () => {
+    mode = "connect";
+    selectedNode = null;
+};
+
+document.getElementById('sendPacketBtn').onclick = () => {
+    mode = "packet";
+    selectedNode = null;
+};
+
+document.getElementById('failBtn').onclick = () => {
+    mode = "fail";
+};
+
+document.getElementById('resetBtn').onclick = () => {
+    nodes = [];
+    edges = [];
+    packets = [];
+    selectedNode = null;
+};
+</script>
+
+</body>
+</html>
